@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI — De wereld kantelt</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --bg: #0a0a1a;
+    --bg-card: #12122a;
+    --accent: #7c5cfc;
+    --accent-glow: #a78bfa;
+    --accent2: #06b6d4;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-bright: #ffffff;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .presentation { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px 80px;
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none; overflow-y: auto;
+  }
+  .slide.active { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+  /* ── Navigation ── */
+  .nav-arrows {
+    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 16px; z-index: 100;
+  }
+  .nav-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 1px solid rgba(124,92,252,0.3); background: rgba(18,18,42,0.8);
+    color: var(--accent-glow); font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; backdrop-filter: blur(10px);
+  }
+  .nav-btn:hover {
+    background: var(--accent); color: white; border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(124,92,252,0.4);
+  }
+  .slide-counter {
+    position: fixed; bottom: 48px; right: 40px; font-size: 14px;
+    color: var(--text-dim); z-index: 100; font-variant-numeric: tabular-nums;
+  }
+  .progress-bar {
+    position: fixed; bottom: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease; z-index: 100;
+    box-shadow: 0 0 10px rgba(124,92,252,0.5);
+  }
+
+  /* ── Slide 1: Opening ── */
+  .slide-1 h1 {
+    font-size: clamp(48px, 6vw, 96px); font-weight: 900;
+    background: linear-gradient(135deg, var(--text-bright), var(--accent-glow));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 60px; text-align: center; line-height: 1.1;
+  }
+  .timeline { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 800px; }
+  .timeline-item {
+    display: flex; align-items: center; gap: 20px;
+    opacity: 0; transform: translateX(-30px); transition: all 0.6s ease;
+  }
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+  .timeline-label { width: 140px; text-align: right; font-size: 18px; font-weight: 600; color: var(--text); flex-shrink: 0; }
+  .timeline-bar-container { flex: 1; height: 44px; background: rgba(255,255,255,0.05); border-radius: 22px; overflow: hidden; position: relative; }
+  .timeline-bar {
+    height: 100%; border-radius: 22px; display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 16px; font-weight: 700; font-size: 16px; color: white;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); width: 0%;
+  }
+  .timeline-item:nth-child(1) .timeline-bar { background: linear-gradient(90deg, #334155, #475569); }
+  .timeline-item:nth-child(2) .timeline-bar { background: linear-gradient(90deg, #1e3a5f, #2563eb); }
+  .timeline-item:nth-child(3) .timeline-bar { background: linear-gradient(90deg, #1e3a5f, #3b82f6); }
+  .timeline-item:nth-child(4) .timeline-bar { background: linear-gradient(90deg, #4c1d95, #7c3aed); }
+  .timeline-item:nth-child(5) .timeline-bar {
+    background: linear-gradient(90deg, var(--accent), #c084fc);
+    box-shadow: 0 0 30px rgba(124,92,252,0.5);
+  }
+  .timeline-item:nth-child(5) .timeline-label { color: var(--accent-glow); font-size: 22px; }
+  .timeline-year { font-size: 13px; color: var(--text-dim); width: 50px; flex-shrink: 0; }
+
+  /* ── Slide 2: Wat is AI ── */
+  .slide-2 { gap: 40px; }
+  .slide-2 h2 { font-size: clamp(36px, 4vw, 64px); font-weight: 800; color: var(--text-bright); text-align: center; }
+  .analogy-box { max-width: 700px; text-align: center; font-size: 20px; line-height: 1.7; color: var(--text); }
+  .analogy-box em { color: var(--accent-glow); font-style: normal; font-weight: 600; }
+  .diagram-container { display: flex; align-items: center; justify-content: center; gap: 0; margin-top: 20px; }
+  .diagram-circle { border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; transition: all 0.4s; }
+  .circle-ai { width: 300px; height: 300px; border: 2px solid rgba(124,92,252,0.3); background: rgba(124,92,252,0.05); position: relative; }
+  .circle-ai-label { position: absolute; top: 20px; font-size: 16px; font-weight: 600; color: var(--accent-glow); }
+  .circle-llm { width: 170px; height: 170px; border: 2px solid var(--accent); background: rgba(124,92,252,0.15); box-shadow: 0 0 30px rgba(124,92,252,0.2); }
+  .circle-llm .circle-title { font-size: 22px; font-weight: 700; color: var(--text-bright); }
+  .circle-llm .circle-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .ai-examples { position: absolute; font-size: 12px; color: var(--text-dim); }
+  .ai-examples.top-left { top: 50px; left: 25px; }
+  .ai-examples.top-right { top: 50px; right: 25px; }
+  .ai-examples.bottom-left { bottom: 50px; left: 20px; }
+  .ai-examples.bottom-right { bottom: 50px; right: 30px; }
+
+  /* ── Slide 3: Hoe snel ── */
+  .slide-3 { gap: 30px; }
+  .slide-3 h2 { font-size: clamp(32px, 3.5vw, 56px); font-weight: 800; color: var(--text-bright); text-align: center; }
+  .chart-container { width: 100%; max-width: 850px; height: 380px; position: relative; }
+  .milestones { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 850px; }
+  .milestone { background: var(--bg-card); border: 1px solid rgba(124,92,252,0.15); border-radius: 12px; padding: 14px 20px; text-align: center; min-width: 140px; }
+  .milestone-year { font-size: 13px; color: var(--accent-glow); font-weight: 600; }
+  .milestone-name { font-size: 16px; font-weight: 700; color: var(--text-bright); margin: 4px 0; }
+  .milestone-desc { font-size: 12px; color: var(--text-dim); }
+
+  /* ── Slide 4: Grote spelers ── */
+  .slide-4 { gap: 30px; }
+  .slide-4 h2 { font-size: clamp(32px, 3.5vw, 56px); font-weight: 800; color: var(--text-bright); }
+  .players-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; max-width: 1000px; }
+  .player-card {
+    background: var(--bg-card); border: 1px solid rgba(124,92,252,0.12); border-radius: 16px;
+    padding: 28px 24px; cursor: pointer; transition: all 0.4s; position: relative; overflow: hidden;
+  }
+  .player-card:hover, .player-card.expanded { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 8px 30px rgba(124,92,252,0.15); }
+  .player-icon { font-size: 36px; margin-bottom: 12px; }
+  .player-name { font-size: 20px; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+  .player-product { font-size: 14px; color: var(--accent-glow); margin-bottom: 8px; }
+  .player-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .player-card.expanded .player-desc { max-height: 200px; }
+  .player-hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; opacity: 0.6; }
+  .player-card.expanded .player-hint { display: none; }
+  .player-badge {
+    position: absolute; top: 12px; right: 12px; background: rgba(124,92,252,0.15);
+    color: var(--accent-glow); font-size: 10px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* ── Slide 5: Wat kan het ── */
+  .slide-5 { gap: 30px; }
+  .slide-5 h2 { font-size: clamp(32px, 3.5vw, 56px); font-weight: 800; color: var(--text-bright); }
+  .capability-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; width: 100%; max-width: 900px; }
+  .cap-item {
+    background: var(--bg-card); border: 1px solid rgba(124,92,252,0.1); border-radius: 14px;
+    padding: 22px 18px; text-align: center; cursor: pointer; transition: all 0.3s;
+  }
+  .cap-item:hover { border-color: var(--accent); background: rgba(124,92,252,0.08); }
+  .cap-item.active { border-color: var(--accent); background: rgba(124,92,252,0.12); box-shadow: 0 0 20px rgba(124,92,252,0.15); }
+  .cap-icon { font-size: 32px; margin-bottom: 8px; }
+  .cap-label { font-size: 14px; font-weight: 600; color: var(--text); }
+  .cap-example-panel {
+    width: 100%; max-width: 900px; min-height: 80px; background: var(--bg-card);
+    border: 1px solid rgba(124,92,252,0.15); border-radius: 14px; padding: 24px 30px; transition: all 0.4s;
+  }
+  .cap-example-panel .example-title { font-size: 16px; font-weight: 700; color: var(--accent-glow); margin-bottom: 8px; }
+  .cap-example-panel .example-text { font-size: 15px; color: var(--text); line-height: 1.6; }
+  .cap-example-panel .example-prompt {
+    display: inline-block; background: rgba(124,92,252,0.1); border: 1px solid rgba(124,92,252,0.2);
+    border-radius: 8px; padding: 4px 12px; font-size: 13px; color: var(--accent-glow);
+    margin-top: 8px; font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* ── Slide 6: Live Demo ── */
+  .slide-6 { gap: 20px; }
+  .slide-6 h2 { font-size: clamp(28px, 3vw, 48px); font-weight: 800; color: var(--text-bright); text-align: center; }
+
+  .demo-container {
+    width: 100%; max-width: 1000px; display: flex; gap: 20px; align-items: flex-start;
+  }
+
+  .demo-input-panel {
+    flex: 1; background: var(--bg-card); border: 1px solid rgba(124,92,252,0.15);
+    border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .demo-input-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+
+  .demo-transcript {
+    font-size: 13px; color: var(--text); line-height: 1.7; max-height: 280px;
+    overflow-y: auto; padding: 16px; background: rgba(0,0,0,0.3); border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .demo-transcript .speaker {
+    font-weight: 700; color: var(--accent-glow); display: inline;
+  }
+
+  .demo-output-panel {
+    flex: 1; background: var(--bg-card); border: 1px solid rgba(124,92,252,0.15);
+    border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 12px;
+    position: relative; min-height: 360px;
+  }
+
+  .demo-output-header {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .demo-ai-avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+
+  .demo-ai-name { font-size: 14px; font-weight: 700; color: var(--accent-glow); }
+
+  .demo-output-content {
+    font-size: 13px; color: var(--text); line-height: 1.7;
+  }
+
+  .demo-output-content .typing-line {
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .demo-output-content .typing-line.visible {
+    opacity: 1; transform: translateY(0);
+  }
+
+  .demo-output-content h4 {
+    font-size: 14px; font-weight: 700; color: var(--accent-glow); margin: 10px 0 4px 0;
+  }
+
+  .demo-output-content .action-item {
+    padding: 3px 0; padding-left: 16px; position: relative;
+  }
+  .demo-output-content .action-item::before {
+    content: ''; position: absolute; left: 4px; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  }
+
+  .demo-btn {
+    padding: 12px 28px; border-radius: 10px; border: none; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.3s; align-self: center;
+    background: linear-gradient(135deg, var(--accent), #9333ea); color: white;
+    box-shadow: 0 4px 20px rgba(124,92,252,0.3);
+  }
+  .demo-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(124,92,252,0.5); }
+  .demo-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  .demo-processing {
+    display: none; align-items: center; gap: 10px; font-size: 13px; color: var(--accent-glow);
+  }
+  .demo-processing.active { display: flex; }
+
+  .typing-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent-glow); margin: 0 2px;
+    animation: dotPulse 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dotPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* ── Slide 7: Context ── */
+  .slide-7 { gap: 24px; }
+  .slide-7 h2 { font-size: clamp(28px, 3vw, 48px); font-weight: 800; color: var(--text-bright); text-align: center; }
+
+  .context-comparison {
+    width: 100%; max-width: 1000px; display: flex; gap: 24px;
+  }
+
+  .context-column {
+    flex: 1; border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 16px;
+    transition: all 0.4s;
+  }
+
+  .context-bad {
+    background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.15);
+  }
+  .context-good {
+    background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.15);
+  }
+
+  .context-label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .context-bad .context-label { color: var(--danger); }
+  .context-good .context-label { color: var(--success); }
+
+  .context-prompt-box {
+    padding: 16px; border-radius: 10px; font-size: 14px; line-height: 1.6;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .context-bad .context-prompt-box {
+    background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.12); color: var(--text-dim);
+  }
+  .context-good .context-prompt-box {
+    background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.12); color: var(--text);
+  }
+
+  .context-arrow {
+    display: flex; align-items: center; justify-content: center; padding: 6px 0;
+    font-size: 18px; color: var(--text-dim);
+  }
+
+  .context-result-box {
+    padding: 16px; border-radius: 10px; font-size: 13px; line-height: 1.7;
+    color: var(--text); flex: 1;
+  }
+  .context-bad .context-result-box {
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+  }
+  .context-good .context-result-box {
+    background: rgba(52,211,153,0.04); border: 1px solid rgba(52,211,153,0.1);
+  }
+
+  .context-result-box .result-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 8px; color: var(--text-dim);
+  }
+
+  .context-verdict {
+    text-align: center; max-width: 700px; font-size: 18px; font-weight: 600;
+    color: var(--text); line-height: 1.6;
+  }
+  .context-verdict em { color: var(--accent-glow); font-style: normal; }
+
+  .context-tabs {
+    display: flex; gap: 8px; justify-content: center; margin-bottom: 4px;
+  }
+  .context-tab {
+    padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.3s; border: 1px solid rgba(124,92,252,0.15);
+    background: transparent; color: var(--text-dim);
+  }
+  .context-tab.active {
+    background: var(--accent); color: white; border-color: var(--accent);
+  }
+  .context-example { display: none; }
+  .context-example.active { display: flex; }
+
+  /* ── Slide 8: Werk ── */
+  .slide-8 { gap: 40px; }
+  .big-quote {
+    font-size: clamp(24px, 3vw, 42px); font-weight: 700; color: var(--text-bright);
+    text-align: center; max-width: 900px; line-height: 1.4; position: relative;
+  }
+  .big-quote::before {
+    content: '\201C'; position: absolute; top: -40px; left: -20px;
+    font-size: 120px; color: rgba(124,92,252,0.15); font-family: Georgia, serif; line-height: 1;
+  }
+  .scale-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+  .scale-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
+  .scale-left { color: var(--danger); }
+  .scale-right { color: var(--success); }
+  .scale-items { display: flex; flex-direction: column; gap: 10px; }
+  .scale-item { display: flex; align-items: center; gap: 14px; }
+  .scale-item-label { width: 200px; text-align: right; font-size: 14px; color: var(--text); flex-shrink: 0; }
+  .scale-bar-bg { flex: 1; height: 28px; background: rgba(255,255,255,0.03); border-radius: 14px; position: relative; overflow: hidden; }
+  .scale-bar-fill { position: absolute; top: 0; height: 100%; border-radius: 14px; transition: width 1s ease; }
+  .scale-bar-fill.risk { left: 0; background: linear-gradient(90deg, var(--danger), transparent); }
+  .scale-bar-fill.opportunity { right: 0; background: linear-gradient(270deg, var(--success), transparent); }
+
+  /* ── Slide 9: En voor jullie ── */
+  .slide-9 { gap: 30px; }
+  .slide-9 h2 { font-size: clamp(32px, 3.5vw, 56px); font-weight: 800; color: var(--text-bright); }
+  .use-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; width: 100%; max-width: 900px; }
+  .use-case { background: var(--bg-card); border: 1px solid rgba(124,92,252,0.12); border-radius: 14px; padding: 24px; transition: all 0.3s; }
+  .use-case:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .use-case-title { font-size: 17px; font-weight: 700; color: var(--text-bright); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .comp-col { font-size: 13px; line-height: 1.6; }
+  .comp-col-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .comp-before .comp-col-header { color: var(--text-dim); }
+  .comp-after .comp-col-header { color: var(--accent-glow); }
+  .comp-before { color: var(--text-dim); }
+  .comp-after { color: var(--text); }
+  .cta-text { font-size: clamp(20px, 2.5vw, 32px); font-weight: 700; color: var(--accent-glow); text-align: center; margin-top: 10px; }
+  .cta-sub { font-size: 16px; color: var(--text-dim); text-align: center; }
+
+  /* ── Ambient ── */
+  .ambient-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: -1; opacity: 0.4; }
+  .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(124,92,252,0.3), transparent); top: -200px; right: -200px; animation: float1 20s ease-in-out infinite; }
+  .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(6,182,212,0.2), transparent); bottom: -200px; left: -150px; animation: float2 25s ease-in-out infinite; }
+  @keyframes float1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-60px,40px); } }
+  @keyframes float2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(50px,-30px); } }
+
+  @media (max-width: 768px) {
+    .slide { padding: 30px 24px; }
+    .capability-grid { grid-template-columns: repeat(2, 1fr); }
+    .players-grid { grid-template-columns: repeat(2, 1fr); }
+    .use-cases { grid-template-columns: 1fr; }
+    .timeline-label { width: 100px; font-size: 14px; }
+    .demo-container { flex-direction: column; }
+    .context-comparison { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div class="presentation" id="presentation">
+
+  <!-- ═══ SLIDE 1: De wereld kantelt ═══ -->
+  <div class="slide slide-1 active" data-slide="1">
+    <h1>De wereld kantelt</h1>
+    <p style="font-size:16px; color:var(--text-dim); margin-bottom:30px; text-align:center;">
+      Hoe lang duurde het om 50 miljoen gebruikers te bereiken?
+    </p>
+    <div class="timeline">
+      <div class="timeline-item" data-delay="0">
+        <span class="timeline-label">Radio</span>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="100">38 jaar</div></div>
+        <span class="timeline-year">1920</span>
+      </div>
+      <div class="timeline-item" data-delay="400">
+        <span class="timeline-label">Televisie</span>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="34">13 jaar</div></div>
+        <span class="timeline-year">1950</span>
+      </div>
+      <div class="timeline-item" data-delay="800">
+        <span class="timeline-label">Internet</span>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="11">4 jaar</div></div>
+        <span class="timeline-year">1995</span>
+      </div>
+      <div class="timeline-item" data-delay="1200">
+        <span class="timeline-label">Instagram</span>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="7">2,5 jaar</div></div>
+        <span class="timeline-year">2010</span>
+      </div>
+      <div class="timeline-item" data-delay="1800">
+        <span class="timeline-label">ChatGPT</span>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="1.5" style="min-width:90px; justify-content:center;">5 dagen</div></div>
+        <span class="timeline-year">2022</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 2: Wat is AI ═══ -->
+  <div class="slide slide-2" data-slide="2">
+    <h2>Wat is AI — en wat niet</h2>
+    <div class="analogy-box">
+      AI is geen denkende robot uit een film.<br>
+      Het is een systeem dat <em>patronen herkent</em> in meer tekst<br>
+      dan een mens in <em>duizend levens</em> kan lezen.
+    </div>
+    <div class="diagram-container">
+      <div class="diagram-circle circle-ai">
+        <span class="circle-ai-label">Kunstmatige Intelligentie</span>
+        <div class="diagram-circle circle-llm">
+          <span class="circle-title">LLM</span>
+          <span class="circle-sub">Taalmodellen</span>
+          <span class="circle-sub" style="font-size:11px; margin-top:2px;">Claude, ChatGPT</span>
+        </div>
+        <span class="ai-examples top-left">Beeldherkenning</span>
+        <span class="ai-examples top-right">Spraak</span>
+        <span class="ai-examples bottom-left">Robotica</span>
+        <span class="ai-examples bottom-right">Zelfrijdend</span>
+      </div>
+    </div>
+    <p style="font-size:14px; color:var(--text-dim); max-width:600px; text-align:center; margin-top:16px;">
+      LLM's — Large Language Models — zijn de motor achter ChatGPT en Claude.<br>
+      Ze begrijpen taal, genereren tekst, en helpen bij taken die vroeger alleen mensen konden.
+    </p>
+  </div>
+
+  <!-- ═══ SLIDE 3: Hoe snel ═══ -->
+  <div class="slide slide-3" data-slide="3">
+    <h2>Hoe snel gaat dit?</h2>
+    <div class="chart-container"><canvas id="evolutionChart"></canvas></div>
+    <div class="milestones">
+      <div class="milestone"><div class="milestone-year">2019</div><div class="milestone-name">GPT-2</div><div class="milestone-desc">Kon zinnen afmaken. Soms grappig, vaak onzin.</div></div>
+      <div class="milestone"><div class="milestone-year">2022</div><div class="milestone-name">ChatGPT</div><div class="milestone-desc">Kon gesprekken voeren. De wereld keek op.</div></div>
+      <div class="milestone"><div class="milestone-year">2024</div><div class="milestone-name">GPT-4o / Claude 3</div><div class="milestone-desc">Kan redeneren, analyseren, coderen, zien.</div></div>
+      <div class="milestone"><div class="milestone-year">2025</div><div class="milestone-name">Nu</div><div class="milestone-desc">Agent-AI die zelfstandig taken uitvoert.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 4: Grote spelers ═══ -->
+  <div class="slide slide-4" data-slide="4">
+    <h2>De grote spelers</h2>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:10px;">Klik op een kaart voor meer informatie</p>
+    <div class="players-grid">
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-icon">🟢</div><div class="player-name">OpenAI</div>
+        <div class="player-product">ChatGPT · GPT-4o</div>
+        <div class="player-desc">De pionier. ChatGPT maakte AI toegankelijk voor iedereen. GPT-4o combineert tekst, beeld en spraak in één model. Heeft de meeste naamsbekendheid en het grootste gebruikersbestand.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-icon">🟠</div><div class="player-name">Anthropic</div>
+        <div class="player-product">Claude</div>
+        <div class="player-desc">Opgericht door ex-OpenAI onderzoekers. Focust op veiligheid en betrouwbaarheid. Claude staat bekend om zorgvuldige, genuanceerde antwoorden en lange documenten goed te verwerken.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-icon">🔵</div><div class="player-name">Google</div>
+        <div class="player-product">Gemini</div>
+        <div class="player-desc">De zoekgigant bouwde zijn eigen AI in alles: Gmail, Docs, Search. Gemini is multimodaal (tekst + beeld + video) en profiteert van Google's enorme dataschat.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-icon">🟣</div><div class="player-name">Meta</div>
+        <div class="player-product">Llama (open source)</div>
+        <div class="player-desc">Meta (Facebook) geeft hun AI-model gratis weg. Iedereen kan het downloaden en aanpassen. Dat versnelt innovatie wereldwijd en maakt AI toegankelijk voor kleinere partijen.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-badge">Al in je software</div>
+        <div class="player-icon">🔷</div><div class="player-name">Microsoft</div>
+        <div class="player-product">Copilot</div>
+        <div class="player-desc">Microsoft heeft AI ingebouwd in Word, Excel, Outlook, Teams en PowerPoint. Als jullie organisatie Microsoft 365 gebruikt, staat Copilot al klaar. Van e-mails samenvatten tot presentaties maken.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 5: Wat kan het ═══ -->
+  <div class="slide slide-5" data-slide="5">
+    <h2>Wat kan het allemaal?</h2>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:6px;">Klik op een categorie voor een voorbeeld</p>
+    <div class="capability-grid">
+      <div class="cap-item" onclick="showCapability(this, 0)"><div class="cap-icon">✍️</div><div class="cap-label">Tekst schrijven</div></div>
+      <div class="cap-item" onclick="showCapability(this, 1)"><div class="cap-icon">📋</div><div class="cap-label">Samenvatten</div></div>
+      <div class="cap-item" onclick="showCapability(this, 2)"><div class="cap-icon">🌍</div><div class="cap-label">Vertalen</div></div>
+      <div class="cap-item" onclick="showCapability(this, 3)"><div class="cap-icon">💻</div><div class="cap-label">Coderen</div></div>
+      <div class="cap-item" onclick="showCapability(this, 4)"><div class="cap-icon">📊</div><div class="cap-label">Data analyseren</div></div>
+      <div class="cap-item" onclick="showCapability(this, 5)"><div class="cap-icon">🎨</div><div class="cap-label">Afbeeldingen</div></div>
+      <div class="cap-item" onclick="showCapability(this, 6)"><div class="cap-icon">🎙️</div><div class="cap-label">Audio & spraak</div></div>
+      <div class="cap-item" onclick="showCapability(this, 7)"><div class="cap-icon">🎬</div><div class="cap-label">Video</div></div>
+    </div>
+    <div class="cap-example-panel" id="capExamplePanel">
+      <div class="example-title" id="capExTitle">Klik hierboven op een categorie</div>
+      <div class="example-text" id="capExText">Elk vakje toont een concreet voorbeeld van wat AI vandaag kan.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 6: LIVE DEMO — Notulen ═══ -->
+  <div class="slide slide-6" data-slide="6">
+    <h2>Even kijken hoe dat werkt</h2>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:6px;">Een vergadering van 45 minuten → gestructureerde notulen in seconden</p>
+
+    <div class="demo-container">
+      <!-- Input: transcript -->
+      <div class="demo-input-panel">
+        <div class="demo-input-label">Fragment uit vergadertranscript</div>
+        <div class="demo-transcript">
+          <span class="speaker">Jan (voorzitter):</span> Goed, laten we beginnen. Vorige keer hadden we het over het communicatieplan. Lisa, hoe staat het daarmee?<br><br>
+          <span class="speaker">Lisa:</span> Het concept is af. Ik heb het rondgestuurd afgelopen vrijdag. Ik wil graag voor 20 april feedback van iedereen, dan kan ik de definitieve versie maken voor de bestuursvergadering op 28 april.<br><br>
+          <span class="speaker">Mark:</span> Ik heb het gelezen. Twee opmerkingen: de social media-aanpak mist nog een planning, en ik denk dat we het budget voor de fotograaf moeten bespreken. Dat was vorige keer ook een openstaand punt.<br><br>
+          <span class="speaker">Jan:</span> Goed punt. Lisa, kun jij die planning toevoegen? En Mark, wil jij een offerte opvragen bij die fotograaf die je eerder noemde?<br><br>
+          <span class="speaker">Lisa:</span> Doe ik. Staat er woensdag.<br><br>
+          <span class="speaker">Mark:</span> Prima, ik mail het deze week nog.<br><br>
+          <span class="speaker">Jan:</span> Mooi. Dan nu het volgende punt: de open dag op 15 mei...
+        </div>
+      </div>
+
+      <!-- Output: AI result -->
+      <div class="demo-output-panel">
+        <div class="demo-output-header">
+          <div class="demo-ai-avatar">C</div>
+          <div class="demo-ai-name">Claude</div>
+          <div class="demo-processing" id="demoProcessing">
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+            <span>Verwerken...</span>
+          </div>
+        </div>
+        <div class="demo-output-content" id="demoOutput">
+          <div style="color:var(--text-dim); font-style:italic;">Klik op de knop om te zien wat AI hiermee doet.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="demo-btn" id="demoBtn" onclick="runDemo()">
+      Verwerk dit transcript
+    </button>
+  </div>
+
+  <!-- ═══ SLIDE 7: Context is alles ═══ -->
+  <div class="slide slide-7" data-slide="7">
+    <h2>Context is alles</h2>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:4px;">Dezelfde taak, andere aanpak — totaal ander resultaat</p>
+
+    <div class="context-tabs">
+      <button class="context-tab active" onclick="switchContextExample(0, this)">Notulen</button>
+      <button class="context-tab" onclick="switchContextExample(1, this)">E-mail</button>
+      <button class="context-tab" onclick="switchContextExample(2, this)">Presentatie</button>
+    </div>
+
+    <!-- Example 1: Notulen -->
+    <div class="context-comparison context-example active" data-ctx="0">
+      <div class="context-column context-bad">
+        <div class="context-label">Zonder context</div>
+        <div class="context-prompt-box">Maak notulen van deze vergadering.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Een lange, letterlijke samenvatting van alles wat gezegd is. Geen structuur, geen actiepunten, geen deadlines uitgelicht. Je moet het zelf nog helemaal ordenen.<br><br>
+          <span style="color:var(--danger); font-weight:600;">20 minuten nawerk</span>
+        </div>
+      </div>
+      <div class="context-column context-good">
+        <div class="context-label">Met context</div>
+        <div class="context-prompt-box">Maak notulen van deze vergadering.<br><br>
+Formaat: korte samenvatting (max 5 regels), dan kopje "Besluiten", dan kopje "Actiepunten" met per punt: wie, wat, deadline.<br><br>
+Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Strakke samenvatting, duidelijke besluiten, actiepuntenlijst met namen en deadlines. Direct bruikbaar. De manager snapt in 30 seconden wat er besproken is.<br><br>
+          <span style="color:var(--success); font-weight:600;">Klaar. Eventueel 2 minuten fine-tuning.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2: E-mail -->
+    <div class="context-comparison context-example" data-ctx="1">
+      <div class="context-column context-bad">
+        <div class="context-label">Zonder context</div>
+        <div class="context-prompt-box">Schrijf een mail om een afspraak te verplaatsen.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Een generieke, formele mail. Klopt grammaticaal, maar klinkt als een robot. Geen persoonlijkheid, verkeerde toon, geen concreet voorstel voor nieuw moment.<br><br>
+          <span style="color:var(--danger); font-weight:600;">Herschrijven nodig</span>
+        </div>
+      </div>
+      <div class="context-column context-good">
+        <div class="context-label">Met context</div>
+        <div class="context-prompt-box">Schrijf een mail aan Pieter van Dijk (externe klant, formeel maar warm) om onze afspraak van dinsdag 15 april 10:00 te verplaatsen. Reden: dubbele boeking. Stel woensdag 16 april of donderdag 17 april voor, ochtend. Onderteken namens Sandra.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Persoonlijke, warme mail met de juiste toon. Concrete alternatieven, nette excuses, klaar om te versturen. Past bij hoe Sandra communiceert.<br><br>
+          <span style="color:var(--success); font-weight:600;">Direct verstuurbaar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 3: Presentatie -->
+    <div class="context-comparison context-example" data-ctx="2">
+      <div class="context-column context-bad">
+        <div class="context-label">Zonder context</div>
+        <div class="context-prompt-box">Maak een presentatie over onze jaarcijfers.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Generieke slides met standaard koppen als "Omzet", "Kosten", "Winst". Geen verhaal, geen highlights, geen aanbevelingen. Bullet-point-soep zonder richting.<br><br>
+          <span style="color:var(--danger); font-weight:600;">Opnieuw beginnen</span>
+        </div>
+      </div>
+      <div class="context-column context-good">
+        <div class="context-label">Met context</div>
+        <div class="context-prompt-box">Maak een presentatie (8 slides) over onze jaarcijfers 2024 voor de Raad van Toezicht. Focus: omzetgroei van 12%, maar personeelskosten stegen harder. Toon: professioneel, eerlijk. Sluit af met 3 strategische keuzes voor 2025. Stijl: weinig tekst, grote cijfers.</div>
+        <div class="context-arrow">↓ resultaat</div>
+        <div class="context-result-box">
+          <div class="result-label">AI geeft je:</div>
+          Gestructureerd verhaal met de juiste focus. Eerlijke toon, grote cijfers, heldere conclusie. De RvT krijgt precies wat ze nodig hebben — inclusief de lastige boodschap.<br><br>
+          <span style="color:var(--success); font-weight:600;">Solide basis, 10 min fine-tuning</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="context-verdict">
+      Het verschil zit niet in de AI — het zit in <em>hoe je het vraagt</em>.<br>
+      Hoe meer context je geeft, hoe minder werk je achteraf hebt.
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 8: Werk ═══ -->
+  <div class="slide slide-8" data-slide="8">
+    <div class="big-quote">
+      AI vervangt niet jouw baan.<br>
+      Maar mensen die AI gebruiken,<br>
+      vervangen mensen die dat niet doen.
+    </div>
+    <div class="scale-container" id="scaleContainer">
+      <div class="scale-header">
+        <span class="scale-left">Wordt geautomatiseerd</span>
+        <span class="scale-right">Wordt belangrijker</span>
+      </div>
+      <div class="scale-items">
+        <div class="scale-item"><span class="scale-item-label">Data invoeren</span><div class="scale-bar-bg"><div class="scale-bar-fill risk" data-width="85"></div></div></div>
+        <div class="scale-item"><span class="scale-item-label">Standaard e-mails</span><div class="scale-bar-bg"><div class="scale-bar-fill risk" data-width="70"></div></div></div>
+        <div class="scale-item"><span class="scale-item-label">Agenda beheren</span><div class="scale-bar-bg"><div class="scale-bar-fill risk" data-width="45"></div><div class="scale-bar-fill opportunity" data-width="40"></div></div></div>
+        <div class="scale-item"><span class="scale-item-label">Relatiebeheer</span><div class="scale-bar-bg"><div class="scale-bar-fill opportunity" data-width="80"></div></div></div>
+        <div class="scale-item"><span class="scale-item-label">Creatief denken</span><div class="scale-bar-bg"><div class="scale-bar-fill opportunity" data-width="90"></div></div></div>
+        <div class="scale-item"><span class="scale-item-label">Oordeel & context</span><div class="scale-bar-bg"><div class="scale-bar-fill opportunity" data-width="95"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SLIDE 9: En voor jullie ═══ -->
+  <div class="slide slide-9" data-slide="9">
+    <h2>En voor jullie?</h2>
+    <div class="use-cases">
+      <div class="use-case">
+        <div class="use-case-title">📝 Vergaderverslagen</div>
+        <div class="comparison">
+          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Meeschrijven tijdens meeting, uitwerken kost 30-60 min, details missen</div>
+          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Opname → automatisch transcript + samenvatting + actiepunten in 2 minuten</div>
+        </div>
+      </div>
+      <div class="use-case">
+        <div class="use-case-title">📧 E-mails schrijven</div>
+        <div class="comparison">
+          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Formuleren, twijfelen over toon, herschrijven, 15 min per mail</div>
+          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Geef context + gewenste toon → concept in seconden. Jij reviewt en verstuurt</div>
+        </div>
+      </div>
+      <div class="use-case">
+        <div class="use-case-title">📅 Afspraken plannen</div>
+        <div class="comparison">
+          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Heen-en-weer mailen, agenda's vergelijken, reistijden uitzoeken</div>
+          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>AI checkt beschikbaarheid, stelt tijden voor, plant inclusief reistijd</div>
+        </div>
+      </div>
+      <div class="use-case">
+        <div class="use-case-title">📊 Presentaties maken</div>
+        <div class="comparison">
+          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Lege slide, uren schuiven met layout en tekst</div>
+          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Geef onderwerp → eerste opzet in minuten. Jij maakt het af</div>
+        </div>
+      </div>
+      <div class="use-case">
+        <div class="use-case-title">🔍 Informatie opzoeken</div>
+        <div class="comparison">
+          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Googelen, scrollen, vergelijken, samenvatten — 30+ minuten</div>
+          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Stel je vraag, krijg een samenvatting met bronnen in seconden</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-text">Hier gaan we vandaag mee aan de slag.</div>
+    <div class="cta-sub">Van theorie naar praktijk — jullie eigen werk, met AI ernaast.</div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav-arrows">
+  <button class="nav-btn" onclick="changeSlide(-1)">←</button>
+  <button class="nav-btn" onclick="changeSlide(1)">→</button>
+</div>
+<div class="slide-counter" id="slideCounter">1 / 9</div>
+<div class="progress-bar" id="progressBar"></div>
+
+<script>
+  // ── State ──
+  let currentSlide = 1;
+  const totalSlides = 9;
+  let chartInstance = null;
+  let slide1Animated = false;
+  let demoRunning = false;
+
+  // ── Navigation ──
+  function changeSlide(direction) {
+    const next = currentSlide + direction;
+    if (next < 1 || next > totalSlides) return;
+    goToSlide(next);
+  }
+
+  function goToSlide(n) {
+    document.querySelector(`.slide[data-slide="${currentSlide}"]`).classList.remove('active');
+    currentSlide = n;
+    const activeSlide = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+    activeSlide.classList.remove('active');
+    void activeSlide.offsetWidth;
+    activeSlide.classList.add('active');
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+    if (currentSlide === 1 && !slide1Animated) animateTimeline();
+    if (currentSlide === 3) animateChart();
+    if (currentSlide === 8) animateScale();
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); changeSlide(-1); }
+  });
+
+  // ── Slide 1: Timeline ──
+  function animateTimeline() {
+    slide1Animated = true;
+    document.querySelectorAll('.timeline-item').forEach((item, i) => {
+      const delay = parseInt(item.dataset.delay) || i * 400;
+      setTimeout(() => {
+        item.classList.add('visible');
+        const bar = item.querySelector('.timeline-bar');
+        setTimeout(() => { bar.style.width = Math.max(parseFloat(bar.dataset.width), 8) + '%'; }, 100);
+      }, 300 + delay);
+    });
+  }
+
+  // ── Slide 3: Chart ──
+  function animateChart() {
+    if (chartInstance) return;
+    const ctx = document.getElementById('evolutionChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+    gradient.addColorStop(0, 'rgba(124, 92, 252, 0.4)');
+    gradient.addColorStop(1, 'rgba(124, 92, 252, 0.0)');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+        datasets: [{
+          label: 'AI-capaciteit (indicatief)',
+          data: [2, 5, 10, 18, 35, 65, 85, 100],
+          borderColor: '#7c5cfc', backgroundColor: gradient, fill: true, tension: 0.4,
+          pointBackgroundColor: '#7c5cfc', pointBorderColor: '#fff', pointBorderWidth: 2,
+          pointRadius: 5, pointHoverRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 1500, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e1e3a', titleColor: '#a78bfa', bodyColor: '#e2e8f0',
+            borderColor: 'rgba(124,92,252,0.3)', borderWidth: 1,
+            callbacks: {
+              label: (ctx) => [
+                'BERT — taalkundig begrip', 'GPT-2 — tekst genereren',
+                'GPT-3 — veelzijdig taalmodel', 'Codex / DALL·E — code + beeld',
+                'ChatGPT — doorbraak publiek', 'GPT-4 / Claude 2 — redeneren',
+                'GPT-4o / Claude 3 — multimodaal', 'Agent-AI — zelfstandig taken uitvoeren'
+              ][ctx.dataIndex]
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 13 } } },
+          y: { display: false, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // ── Slide 4: Players ──
+  function togglePlayer(card) {
+    const was = card.classList.contains('expanded');
+    document.querySelectorAll('.player-card').forEach(c => c.classList.remove('expanded'));
+    if (!was) card.classList.add('expanded');
+  }
+
+  // ── Slide 5: Capabilities ──
+  const capabilities = [
+    { title: 'Tekst schrijven', text: 'Van e-mails en rapporten tot beleidstukken en social media posts. Je geeft de context en toon aan, AI schrijft een concept dat je kunt aanpassen.', prompt: '"Schrijf een beleefde afwijzingsmail voor een sollicitant, warm maar duidelijk"' },
+    { title: 'Samenvatten', text: 'Een rapport van 40 pagina\'s in 5 bullets. Een vergadering van een uur in een halve pagina. AI haalt de kern eruit — jij behoudt het overzicht.', prompt: '"Vat dit document samen in 5 kernpunten voor de directie"' },
+    { title: 'Vertalen', text: 'Niet alleen woorden, maar ook toon en context. AI vertaalt een formele brief naar natuurlijk klinkend Engels, Frans of Duits — beter dan Google Translate.', prompt: '"Vertaal deze mail naar zakelijk Engels, behoud de vriendelijke toon"' },
+    { title: 'Coderen', text: 'AI kan websites bouwen, scripts schrijven, en formules maken. Deze presentatie is bijvoorbeeld volledig door AI geschreven — inclusief alle animaties.', prompt: '"Maak een Excel-formule die automatisch de reistijd berekent"' },
+    { title: 'Data analyseren', text: 'Upload een spreadsheet en stel vragen in gewone taal. AI vindt trends, maakt grafieken, en geeft inzichten die je anders uren kosten.', prompt: '"Analyseer deze cijfers en laat zien welke afdeling het meest groeit"' },
+    { title: 'Afbeeldingen genereren', text: 'Beschrijf wat je wilt zien — AI maakt het. Van een professionele infographic tot een illustratie voor een presentatie. Geen Photoshop-skills nodig.', prompt: '"Maak een illustratie van een modern kantoor met samenwerkende collega\'s"' },
+    { title: 'Audio & spraak', text: 'Opnames automatisch uitschrijven (transcriberen), stemmen klonen voor vertalingen, of podcasts laten samenvatten. Spraak wordt tekst, en tekst wordt spraak.', prompt: '"Transcribeer deze vergaderopname en maak een actielijst"' },
+    { title: 'Video', text: 'AI kan video\'s samenvatten, ondertitels genereren, en zelfs korte video\'s maken op basis van tekst. Tools als Sora (OpenAI) genereren realistische beelden uit beschrijvingen.', prompt: '"Genereer een 15-seconden introductievideo voor ons team"' }
+  ];
+
+  function showCapability(el, index) {
+    document.querySelectorAll('.cap-item').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const cap = capabilities[index];
+    document.getElementById('capExTitle').textContent = cap.title;
+    document.getElementById('capExText').innerHTML = cap.text + '<br><span class="example-prompt">' + cap.prompt + '</span>';
+  }
+
+  // ── Slide 6: Live Demo ──
+  function runDemo() {
+    if (demoRunning) return;
+    demoRunning = true;
+    const btn = document.getElementById('demoBtn');
+    const proc = document.getElementById('demoProcessing');
+    const output = document.getElementById('demoOutput');
+
+    btn.disabled = true;
+    btn.textContent = 'Bezig...';
+    proc.classList.add('active');
+    output.innerHTML = '';
+
+    const lines = [
+      { type: 'heading', text: 'Samenvatting', delay: 800 },
+      { type: 'text', text: 'Besproken: voortgang communicatieplan en voorbereiding open dag 15 mei. Communicatieplan is in conceptfase, feedback wordt verzameld voor definitieve versie.', delay: 400 },
+      { type: 'heading', text: 'Besluiten', delay: 600 },
+      { type: 'text', text: 'Definitieve versie communicatieplan wordt voorgelegd aan bestuursvergadering op 28 april.', delay: 300 },
+      { type: 'text', text: 'Social media-planning wordt toegevoegd aan het communicatieplan.', delay: 300 },
+      { type: 'heading', text: 'Actiepunten', delay: 600 },
+      { type: 'action', text: '<strong>Lisa</strong> — Social media-planning toevoegen aan communicatieplan <span style="color:var(--accent-glow)">→ woensdag 16 april</span>', delay: 350 },
+      { type: 'action', text: '<strong>Mark</strong> — Offerte opvragen bij fotograaf <span style="color:var(--accent-glow)">→ deze week</span>', delay: 350 },
+      { type: 'action', text: '<strong>Allen</strong> — Feedback op communicatieplan aanleveren <span style="color:var(--accent-glow)">→ voor 20 april</span>', delay: 350 },
+      { type: 'heading', text: 'Openstaand', delay: 600 },
+      { type: 'text', text: 'Budget fotograaf — wordt besproken na ontvangst offerte.', delay: 300 },
+    ];
+
+    let totalDelay = 600;
+    lines.forEach((line) => {
+      totalDelay += line.delay;
+      setTimeout(() => {
+        let el = document.createElement('div');
+        el.classList.add('typing-line');
+        if (line.type === 'heading') {
+          el.innerHTML = `<h4>${line.text}</h4>`;
+        } else if (line.type === 'action') {
+          el.classList.add('action-item');
+          el.innerHTML = line.text;
+        } else {
+          el.innerHTML = line.text;
+        }
+        output.appendChild(el);
+        requestAnimationFrame(() => { el.classList.add('visible'); });
+      }, totalDelay);
+    });
+
+    setTimeout(() => {
+      proc.classList.remove('active');
+      btn.textContent = 'Klaar — dat was het';
+      btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+    }, totalDelay + 400);
+  }
+
+  // ── Slide 7: Context examples ──
+  function switchContextExample(index, tab) {
+    document.querySelectorAll('.context-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.context-example').forEach(ex => ex.classList.remove('active'));
+    document.querySelector(`.context-example[data-ctx="${index}"]`).classList.add('active');
+  }
+
+  // ── Slide 8: Scale ──
+  function animateScale() {
+    document.querySelectorAll('.scale-bar-fill').forEach(fill => {
+      setTimeout(() => { fill.style.width = fill.dataset.width + '%'; }, 300);
+    });
+  }
+
+  // ── Init ──
+  document.getElementById('progressBar').style.width = `${(1 / totalSlides) * 100}%`;
+  setTimeout(() => { animateTimeline(); }, 600);
+</script>
+</body>
+</html>
