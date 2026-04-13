@@ -409,20 +409,9 @@
   .scale-bar-fill.risk { left: 0; background: linear-gradient(90deg, var(--danger), transparent); }
   .scale-bar-fill.opportunity { right: 0; background: linear-gradient(270deg, var(--success), transparent); }
 
-  /* ── Slide 9: En voor jullie ── */
-  .slide-9 { gap: 30px; }
+  /* ── Slide 9: Drie dingen ── */
+  .slide-9 { gap: 24px; }
   .slide-9 h2 { font-size: clamp(32px, 3.5vw, 56px); font-weight: 800; color: var(--text-bright); }
-  .use-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; width: 100%; max-width: 900px; }
-  .use-case { background: var(--bg-card); border: 1px solid rgba(124,92,252,0.12); border-radius: 14px; padding: 24px; transition: all 0.3s; }
-  .use-case:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .use-case-title { font-size: 17px; font-weight: 700; color: var(--text-bright); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .comp-col { font-size: 13px; line-height: 1.6; }
-  .comp-col-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .comp-before .comp-col-header { color: var(--text-dim); }
-  .comp-after .comp-col-header { color: var(--accent-glow); }
-  .comp-before { color: var(--text-dim); }
-  .comp-after { color: var(--text); }
   .cta-text { font-size: clamp(20px, 2.5vw, 32px); font-weight: 700; color: var(--accent-glow); text-align: center; margin-top: 10px; }
   .cta-sub { font-size: 16px; color: var(--text-dim); text-align: center; }
 
@@ -454,28 +443,29 @@
   <!-- ═══ SLIDE 1: De wereld kantelt ═══ -->
   <div class="slide slide-1 active" data-slide="1">
     <h1>De wereld kantelt</h1>
+    <p style="font-size:14px; color:var(--text-dim); margin-bottom:4px; text-align:center;">13 april 2025</p>
     <p style="font-size:16px; color:var(--text-dim); margin-bottom:30px; text-align:center;">
-      Hoe lang duurde het om 50 miljoen gebruikers te bereiken?
+      Hoe snel bereikten technologieën hun eerste miljoen gebruikers?
     </p>
     <div class="timeline">
       <div class="timeline-item" data-delay="0">
         <span class="timeline-label">Radio</span>
-        <div class="timeline-bar-container"><div class="timeline-bar" data-width="100">38 jaar</div></div>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="100">~3,5 jaar</div></div>
         <span class="timeline-year">1920</span>
       </div>
       <div class="timeline-item" data-delay="400">
         <span class="timeline-label">Televisie</span>
-        <div class="timeline-bar-container"><div class="timeline-bar" data-width="34">13 jaar</div></div>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="40">~1,5 jaar</div></div>
         <span class="timeline-year">1950</span>
       </div>
       <div class="timeline-item" data-delay="800">
         <span class="timeline-label">Internet</span>
-        <div class="timeline-bar-container"><div class="timeline-bar" data-width="11">4 jaar</div></div>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="20">~8 maanden</div></div>
         <span class="timeline-year">1995</span>
       </div>
       <div class="timeline-item" data-delay="1200">
         <span class="timeline-label">Instagram</span>
-        <div class="timeline-bar-container"><div class="timeline-bar" data-width="7">2,5 jaar</div></div>
+        <div class="timeline-bar-container"><div class="timeline-bar" data-width="8">2,5 maand</div></div>
         <span class="timeline-year">2010</span>
       </div>
       <div class="timeline-item" data-delay="1800">
@@ -484,6 +474,9 @@
         <span class="timeline-year">2022</span>
       </div>
     </div>
+    <p style="font-size:14px; color:var(--accent-glow); margin-top:24px; text-align:center; opacity:0; transition: opacity 0.8s ease 3.5s;" class="slide1-footnote">
+      Na 2 maanden: 100 miljoen gebruikers. De snelst groeiende app ooit.
+    </p>
   </div>
 
   <!-- ═══ SLIDE 2: Wat is AI ═══ -->
@@ -562,6 +555,13 @@
         <div class="player-desc">Microsoft heeft AI ingebouwd in Word, Excel, Outlook, Teams en PowerPoint. Als jullie organisatie Microsoft 365 gebruikt, staat Copilot al klaar. Van e-mails samenvatten tot presentaties maken.</div>
         <div class="player-hint">Klik voor meer →</div>
       </div>
+      <div class="player-card" onclick="togglePlayer(this)">
+        <div class="player-badge">Nieuwkomer 2025</div>
+        <div class="player-icon">🔴</div><div class="player-name">DeepSeek</div>
+        <div class="player-product">DeepSeek-R1 (China)</div>
+        <div class="player-desc">Begin 2025 wereldnieuws: een Chinees model dat kan meedraaien met de top, maar tegen een fractie van de kosten is gebouwd. Laat zien dat AI niet alleen een Amerikaans verhaal is — en dat de race versnelt.</div>
+        <div class="player-hint">Klik voor meer →</div>
+      </div>
     </div>
   </div>
 
@@ -593,15 +593,30 @@
     <div class="demo-container">
       <!-- Input: transcript -->
       <div class="demo-input-panel">
-        <div class="demo-input-label">Fragment uit vergadertranscript</div>
+        <div class="demo-input-label">Vergadertranscript · MT-overleg · 42 minuten</div>
         <div class="demo-transcript">
-          <span class="speaker">Jan (voorzitter):</span> Goed, laten we beginnen. Vorige keer hadden we het over het communicatieplan. Lisa, hoe staat het daarmee?<br><br>
-          <span class="speaker">Lisa:</span> Het concept is af. Ik heb het rondgestuurd afgelopen vrijdag. Ik wil graag voor 20 april feedback van iedereen, dan kan ik de definitieve versie maken voor de bestuursvergadering op 28 april.<br><br>
-          <span class="speaker">Mark:</span> Ik heb het gelezen. Twee opmerkingen: de social media-aanpak mist nog een planning, en ik denk dat we het budget voor de fotograaf moeten bespreken. Dat was vorige keer ook een openstaand punt.<br><br>
-          <span class="speaker">Jan:</span> Goed punt. Lisa, kun jij die planning toevoegen? En Mark, wil jij een offerte opvragen bij die fotograaf die je eerder noemde?<br><br>
-          <span class="speaker">Lisa:</span> Doe ik. Staat er woensdag.<br><br>
-          <span class="speaker">Mark:</span> Prima, ik mail het deze week nog.<br><br>
-          <span class="speaker">Jan:</span> Mooi. Dan nu het volgende punt: de open dag op 15 mei...
+          <span class="speaker">Jan (voorzitter):</span> Goed, welkom allemaal. We hebben vandaag een volle agenda. Laten we beginnen met het communicatieplan. Lisa, hoe staat het ervoor?<br><br>
+          <span class="speaker">Lisa:</span> Het concept is af. Ik heb het afgelopen vrijdag rondgestuurd via mail. Ik zou graag voor 20 april feedback van iedereen willen, dan kan ik de definitieve versie klaarmaken voor de bestuursvergadering op 28 april.<br><br>
+          <span class="speaker">Mark:</span> Ik heb het gelezen. Inhoudelijk vind ik het sterk. Twee dingen vallen me op: de social media-aanpak mist nog een concrete planning — wanneer posten we wat? En het budget voor de fotograaf staat er nog niet in. Dat was vorige keer ook een openstaand punt.<br><br>
+          <span class="speaker">Sandra:</span> Eens met Mark over die planning. Ik zou ook graag een korte paragraaf zien over interne communicatie. We vergeten altijd dat onze eigen medewerkers het ook moeten horen. Niet alleen extern.<br><br>
+          <span class="speaker">Jan:</span> Goede punten. Lisa, kun jij die social media-planning toevoegen? En Sandra's punt over interne communicatie meenemen?<br><br>
+          <span class="speaker">Lisa:</span> Doe ik. Ik heb de planning woensdag af. Die paragraaf over interne communicatie kan ik er donderdag bij doen, als Sandra me even een zetje geeft over wat ze precies bedoelt.<br><br>
+          <span class="speaker">Sandra:</span> Ik stuur je vanmiddag een kort mailtje met wat ik voor ogen heb.<br><br>
+          <span class="speaker">Jan:</span> Top. Mark, wil jij een offerte opvragen bij die fotograaf die je eerder had genoemd?<br><br>
+          <span class="speaker">Mark:</span> Ja, doe ik deze week. Ik vraag twee opties: een halve dag en een hele dag, zodat we kunnen vergelijken.<br><br>
+          <span class="speaker">Jan:</span> Perfect. Dan het volgende punt. De open dag op 15 mei. Sandra, jij zou de locatie regelen?<br><br>
+          <span class="speaker">Sandra:</span> Dat klopt. Ik heb twee locaties bezichtigd. Het Kulturhus is beschikbaar maar heeft geen parkeergelegenheid. De Buitenplaats is duurder maar veel beter bereikbaar. Ik neig naar De Buitenplaats, maar dan zitten we 800 euro boven budget.<br><br>
+          <span class="speaker">Jan:</span> Hoeveel boven budget precies?<br><br>
+          <span class="speaker">Sandra:</span> Het Kulturhus kost 1.200 euro, De Buitenplaats 2.000. Ons budget was 1.500.<br><br>
+          <span class="speaker">Mark:</span> Ik zou voor De Buitenplaats gaan. Als mensen niet kunnen parkeren komen ze niet. Dat is penny wise, pound foolish.<br><br>
+          <span class="speaker">Lisa:</span> Ben ik het mee eens. Kunnen we dat verschil niet dekken uit het communicatiebudget? We hebben die advertentie in de krant laten vallen.<br><br>
+          <span class="speaker">Jan:</span> Goed idee. Lisa, kun jij checken of dat kan? Dan bevestigen we De Buitenplaats zodra dat rond is.<br><br>
+          <span class="speaker">Lisa:</span> Ik check het morgen met financiën.<br><br>
+          <span class="speaker">Jan:</span> Mooi. Dan het laatste punt: de kwartaalcijfers. Mark?<br><br>
+          <span class="speaker">Mark:</span> We zitten op 94% van target. Goede maand gehad in maart. Maar ik maak me zorgen over Q2 — we hebben twee grote klanten die hun contract mogelijk niet verlengen. Ik stel voor dat ik volgende week een risicoanalyse presenteer, zodat we niet voor verrassingen staan.<br><br>
+          <span class="speaker">Jan:</span> Graag. Kun je dat klaar hebben voor het MT van volgende week dinsdag?<br><br>
+          <span class="speaker">Mark:</span> Wordt krap, maar het lukt als ik de cijfers uiterlijk vrijdag van Peter krijg.<br><br>
+          <span class="speaker">Jan:</span> Ik mail Peter vandaag nog. Verder nog iets? ... Nee? Dan sluit ik de vergadering. Bedankt allemaal.
         </div>
       </div>
 
@@ -724,6 +739,12 @@ Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
       Maar mensen die AI gebruiken,<br>
       vervangen mensen die dat niet doen.
     </div>
+    <div style="display:flex; gap:24px; max-width:700px; margin:10px 0 10px 0; justify-content:center;">
+      <div style="background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.2); border-radius:12px; padding:16px 22px; flex:1;">
+        <div style="font-size:13px; font-weight:700; color:var(--warning); margin-bottom:6px;">Eerlijk zijn</div>
+        <div style="font-size:13px; color:var(--text); line-height:1.6;">AI liegt soms overtuigend. Het verzint bronnen, maakt rekenfouten, en klinkt zeker als het ongelijk heeft. Altijd controleren — jij blijft verantwoordelijk.</div>
+      </div>
+    </div>
     <div class="scale-container" id="scaleContainer">
       <div class="scale-header">
         <span class="scale-left">Wordt geautomatiseerd</span>
@@ -740,48 +761,34 @@ Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
     </div>
   </div>
 
-  <!-- ═══ SLIDE 9: En voor jullie ═══ -->
+  <!-- ═══ SLIDE 9: Drie dingen om te onthouden ═══ -->
   <div class="slide slide-9" data-slide="9">
-    <h2>En voor jullie?</h2>
-    <div class="use-cases">
-      <div class="use-case">
-        <div class="use-case-title">📝 Vergaderverslagen</div>
-        <div class="comparison">
-          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Meeschrijven tijdens meeting, uitwerken kost 30-60 min, details missen</div>
-          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Opname → automatisch transcript + samenvatting + actiepunten in 2 minuten</div>
+    <h2>Drie dingen om te onthouden</h2>
+    <div style="display:flex; flex-direction:column; gap:20px; width:100%; max-width:800px; margin-top:10px;">
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg, var(--accent), #9333ea); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:white; flex-shrink:0;">1</div>
+        <div>
+          <div style="font-size:20px; font-weight:700; color:var(--text-bright); margin-bottom:6px;">Het is er al</div>
+          <div style="font-size:15px; color:var(--text); line-height:1.6;">AI is geen toekomstmuziek. Het zit in je Outlook, in je telefoon, in tools die je vandaag kunt proberen. De drempel is lager dan je denkt.</div>
         </div>
       </div>
-      <div class="use-case">
-        <div class="use-case-title">📧 E-mails schrijven</div>
-        <div class="comparison">
-          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Formuleren, twijfelen over toon, herschrijven, 15 min per mail</div>
-          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Geef context + gewenste toon → concept in seconden. Jij reviewt en verstuurt</div>
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg, var(--accent), #9333ea); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:white; flex-shrink:0;">2</div>
+        <div>
+          <div style="font-size:20px; font-weight:700; color:var(--text-bright); margin-bottom:6px;">Context is alles</div>
+          <div style="font-size:15px; color:var(--text); line-height:1.6;">Hoe specifieker je vraagt, hoe beter het resultaat. Niet "schrijf een mail" maar: wie, waarvoor, welke toon, welk doel. Jouw kennis van de organisatie is de sleutel.</div>
         </div>
       </div>
-      <div class="use-case">
-        <div class="use-case-title">📅 Afspraken plannen</div>
-        <div class="comparison">
-          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Heen-en-weer mailen, agenda's vergelijken, reistijden uitzoeken</div>
-          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>AI checkt beschikbaarheid, stelt tijden voor, plant inclusief reistijd</div>
-        </div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">📊 Presentaties maken</div>
-        <div class="comparison">
-          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Lege slide, uren schuiven met layout en tekst</div>
-          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Geef onderwerp → eerste opzet in minuten. Jij maakt het af</div>
-        </div>
-      </div>
-      <div class="use-case">
-        <div class="use-case-title">🔍 Informatie opzoeken</div>
-        <div class="comparison">
-          <div class="comp-col comp-before"><div class="comp-col-header">Vroeger</div>Googelen, scrollen, vergelijken, samenvatten — 30+ minuten</div>
-          <div class="comp-col comp-after"><div class="comp-col-header">Met AI</div>Stel je vraag, krijg een samenvatting met bronnen in seconden</div>
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(135deg, var(--accent), #9333ea); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:900; color:white; flex-shrink:0;">3</div>
+        <div>
+          <div style="font-size:20px; font-weight:700; color:var(--text-bright); margin-bottom:6px;">Jij blijft aan het stuur</div>
+          <div style="font-size:15px; color:var(--text); line-height:1.6;">AI is een assistent, geen vervanger. Het maakt een eerste versie — jij beoordeelt, corrigeert en verstuurt. Jouw oordeel, relaties en context zijn onvervangbaar.</div>
         </div>
       </div>
     </div>
-    <div class="cta-text">Dit is pas het begin.</div>
-    <div class="cta-sub">Stel je voor wat dit betekent voor jouw dagelijkse werk.</div>
+    <div class="cta-text" style="margin-top:30px;">Dit is pas het begin.</div>
+    <div class="cta-sub">De vraag is niet óf AI jullie werk verandert, maar hoe snel jullie ermee beginnen.</div>
   </div>
 
 </div>
@@ -841,6 +848,11 @@ Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
         setTimeout(() => { bar.style.width = Math.max(parseFloat(bar.dataset.width), 8) + '%'; }, 100);
       }, 300 + delay);
     });
+    // Show footnote after timeline completes
+    setTimeout(() => {
+      const fn = document.querySelector('.slide1-footnote');
+      if (fn) fn.style.opacity = '1';
+    }, 3000);
   }
 
   // ── Slide 2: Diagram animation ──
@@ -935,21 +947,29 @@ Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
 
     btn.disabled = true;
     btn.textContent = 'Bezig...';
+    btn.style.background = '';
     proc.classList.add('active');
     output.innerHTML = '';
 
     const lines = [
       { type: 'heading', text: 'Samenvatting', delay: 800 },
-      { type: 'text', text: 'Besproken: voortgang communicatieplan en voorbereiding open dag 15 mei. Communicatieplan is in conceptfase, feedback wordt verzameld voor definitieve versie.', delay: 400 },
+      { type: 'text', text: 'MT-overleg met Jan (vz), Lisa, Mark en Sandra. Drie onderwerpen besproken: communicatieplan (conceptfase, feedback gevraagd voor 20 april), open dag 15 mei (locatiekeuze) en kwartaalcijfers Q1 (94% van target, zorgen over Q2).', delay: 500 },
       { type: 'heading', text: 'Besluiten', delay: 600 },
-      { type: 'text', text: 'Definitieve versie communicatieplan wordt voorgelegd aan bestuursvergadering op 28 april.', delay: 300 },
-      { type: 'text', text: 'Social media-planning wordt toegevoegd aan het communicatieplan.', delay: 300 },
+      { type: 'text', text: '1. Communicatieplan wordt aangevuld met social media-planning, interne communicatie, en gaat naar de bestuursvergadering op 28 april.', delay: 300 },
+      { type: 'text', text: '2. Locatie open dag: De Buitenplaats (€2.000), mits budgetverschuiving goedgekeurd door financiën.', delay: 300 },
+      { type: 'text', text: '3. Mark levert volgende week dinsdag een risicoanalyse Q2 aan het MT.', delay: 300 },
       { type: 'heading', text: 'Actiepunten', delay: 600 },
-      { type: 'action', text: '<strong>Lisa</strong> — Social media-planning toevoegen aan communicatieplan <span style="color:var(--accent-glow)">→ woensdag 16 april</span>', delay: 350 },
-      { type: 'action', text: '<strong>Mark</strong> — Offerte opvragen bij fotograaf <span style="color:var(--accent-glow)">→ deze week</span>', delay: 350 },
-      { type: 'action', text: '<strong>Allen</strong> — Feedback op communicatieplan aanleveren <span style="color:var(--accent-glow)">→ voor 20 april</span>', delay: 350 },
+      { type: 'action', text: '<strong>Lisa</strong> — Social media-planning toevoegen aan communicatieplan <span style="color:var(--accent-glow)">→ woensdag</span>', delay: 300 },
+      { type: 'action', text: '<strong>Sandra</strong> — Mail naar Lisa over interne communicatiewensen <span style="color:var(--accent-glow)">→ vandaag</span>', delay: 300 },
+      { type: 'action', text: '<strong>Lisa</strong> — Paragraaf interne communicatie toevoegen <span style="color:var(--accent-glow)">→ donderdag</span>', delay: 300 },
+      { type: 'action', text: '<strong>Mark</strong> — Twee offertes fotograaf opvragen (halve/hele dag) <span style="color:var(--accent-glow)">→ deze week</span>', delay: 300 },
+      { type: 'action', text: '<strong>Lisa</strong> — Budget open dag checken met financiën <span style="color:var(--accent-glow)">→ morgen</span>', delay: 300 },
+      { type: 'action', text: '<strong>Jan</strong> — Peter mailen om kwartaalcijfers <span style="color:var(--accent-glow)">→ vandaag</span>', delay: 300 },
+      { type: 'action', text: '<strong>Mark</strong> — Risicoanalyse Q2 presenteren aan MT <span style="color:var(--accent-glow)">→ volgende week dinsdag</span>', delay: 300 },
+      { type: 'action', text: '<strong>Allen</strong> — Feedback op communicatieplan <span style="color:var(--accent-glow)">→ voor 20 april</span>', delay: 300 },
       { type: 'heading', text: 'Openstaand', delay: 600 },
-      { type: 'text', text: 'Budget fotograaf — wordt besproken na ontvangst offerte.', delay: 300 },
+      { type: 'text', text: 'Budget fotograaf — wordt besproken na ontvangst offertes.', delay: 250 },
+      { type: 'text', text: 'Contractverlenging twee grote klanten Q2 — risicoanalyse volgt.', delay: 250 },
     ];
 
     let totalDelay = 600;
@@ -973,8 +993,10 @@ Doelgroep: de deelnemers + hun manager die er niet bij was.</div>
 
     setTimeout(() => {
       proc.classList.remove('active');
-      btn.textContent = 'Klaar — dat was het';
+      btn.textContent = 'Opnieuw afspelen';
       btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+      btn.disabled = false;
+      demoRunning = false;
     }, totalDelay + 400);
   }
 
